@@ -31,4 +31,12 @@ public class TestData {
                 .build();
     }
 
+    public static UpdateMenuRequest updateMenuShortRequest() {
+        return UpdateMenuRequest.builder()
+                .name("New Cappuccino")
+                .description("New Cappuccino Description")
+                .price(BigDecimal.valueOf(100.01))
+                .build();
+    }
+
 }

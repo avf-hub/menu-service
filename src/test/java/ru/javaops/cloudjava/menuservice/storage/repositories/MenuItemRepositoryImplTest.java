@@ -20,9 +20,12 @@ import ru.javaops.cloudjava.menuservice.testutils.TestData;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 @Import(MenuAttrUpdaters.class)
@@ -57,17 +60,26 @@ class MenuItemRepositoryImplTest {
 
     @Test
     void updateMenu_updatesMenu_whenSomeUpdateFieldsAreSet() {
-        // TODO
+        var dto = TestData.updateMenuShortRequest();
+        var id = getIdByName("Cappuccino");
+        int updateCount = menuItemRepository.updateMenu(id, dto);
+        assertThat(updateCount).isEqualTo(1);
+        MenuItem updated = menuItemRepository.findById(id).orElse(null);
+        assertFieldsEquality(updated, dto, "name", "description", "price");
     }
 
     @Test
     void updateMenu_throws_whenUpdateRequestHasNotUniqueName() {
-        // TODO
+        var id = getIdByName("empty");
+        assertEquals(0, (long) id);
     }
 
     @Test
     void updateMenu_updatesNothing_whenNoMenuPresentInDB() {
-        // TODO
+        var id = getIdByName("empty");
+        assertEquals(0, (long) id);
+        Optional<MenuItem> updated = menuItemRepository.findById(id);
+        assertTrue(updated.isEmpty());
     }
 
     @Test
@@ -79,27 +91,37 @@ class MenuItemRepositoryImplTest {
 
     @Test
     void getMenusFor_returnsCorrectListForDRINKS_sortedByPriceDesc() {
-        // TODO
+        var drinks = menuItemRepository.getMenusFor(Category.DRINKS, SortBy.PRICE_DESC);
+        assertThat(drinks).hasSize(3);
+        assertElementsInOrder(drinks, MenuItem::getName, List.of("Tea", "Wine", "Cappuccino"));
     }
 
     @Test
     void getMenusFor_returnsCorrectListForDRINKS_sortedByNameAsc() {
-        // TODO
+        var drinks = menuItemRepository.getMenusFor(Category.DRINKS, SortBy.AZ);
+        assertThat(drinks).hasSize(3);
+        assertElementsInOrder(drinks, MenuItem::getName, List.of("Cappuccino", "Tea", "Wine"));
     }
 
     @Test
     void getMenusFor_returnsCorrectListForDRINKS_sortedByNameDesc() {
-        // TODO
+        var drinks = menuItemRepository.getMenusFor(Category.DRINKS, SortBy.ZA);
+        assertThat(drinks).hasSize(3);
+        assertElementsInOrder(drinks, MenuItem::getName, List.of("Wine", "Tea", "Cappuccino"));
     }
 
     @Test
     void getMenusFor_returnsCorrectListForDRINKS_sortedByDateAsc() {
-        // TODO
+        var drinks = menuItemRepository.getMenusFor(Category.DRINKS, SortBy.DATE_ASC);
+        assertThat(drinks).hasSize(3);
+        assertElementsInOrder(drinks, MenuItem::getName, List.of("Cappuccino", "Wine", "Tea"));
     }
 
     @Test
     void getMenusFor_returnsCorrectListForDRINKS_sortedByDateDesc() {
-        // TODO
+        var drinks = menuItemRepository.getMenusFor(Category.DRINKS, SortBy.DATE_DESC);
+        assertThat(drinks).hasSize(3);
+        assertElementsInOrder(drinks, MenuItem::getName, List.of("Tea", "Wine", "Cappuccino"));
     }
 
     private Long getIdByName(String name) {
