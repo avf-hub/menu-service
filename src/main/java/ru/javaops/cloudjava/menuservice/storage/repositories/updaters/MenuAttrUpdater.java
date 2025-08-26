@@ -5,9 +5,18 @@ import lombok.AllArgsConstructor;
 import ru.javaops.cloudjava.menuservice.dto.UpdateMenuRequest;
 import ru.javaops.cloudjava.menuservice.storage.model.MenuItem;
 
+import java.util.function.Function;
+
 @AllArgsConstructor
 public class MenuAttrUpdater<V> {
+    private final Function<UpdateMenuRequest, V> dtoValueExtractor;
+    private final String attr;
+
     public void updateAttr(CriteriaUpdate<MenuItem> criteria, UpdateMenuRequest dto) {
-        //  TODO  criteria.set(attr, dtoValue);
+        V value = dtoValueExtractor.apply(dto);
+
+        if (value != null) {
+            criteria.set(attr, value);
+        }
     }
 }

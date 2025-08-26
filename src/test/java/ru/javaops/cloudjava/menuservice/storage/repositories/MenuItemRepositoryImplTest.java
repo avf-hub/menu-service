@@ -6,26 +6,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javaops.cloudjava.menuservice.dto.SortBy;
+import ru.javaops.cloudjava.menuservice.dto.UpdateMenuRequest;
 import ru.javaops.cloudjava.menuservice.storage.model.Category;
 import ru.javaops.cloudjava.menuservice.storage.model.MenuItem;
 import ru.javaops.cloudjava.menuservice.storage.repositories.updaters.MenuAttrUpdaters;
 import ru.javaops.cloudjava.menuservice.testutils.TestData;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @Import(MenuAttrUpdaters.class)
@@ -70,16 +72,22 @@ class MenuItemRepositoryImplTest {
 
     @Test
     void updateMenu_throws_whenUpdateRequestHasNotUniqueName() {
-        var id = getIdByName("empty");
-        assertEquals(0, (long) id);
+        var dto = UpdateMenuRequest.builder()
+                .name("Tea")
+                .price(BigDecimal.valueOf(40))
+                .description("Nice Tea")
+                .imageUrl("http://images.com/tea.png")
+                .build();
+        var id = getIdByName("Cappuccino");
+        assertThrows(DataIntegrityViolationException.class,
+                () -> menuItemRepository.updateMenu(id, dto));
     }
 
     @Test
     void updateMenu_updatesNothing_whenNoMenuPresentInDB() {
-        var id = getIdByName("empty");
-        assertEquals(0, (long) id);
-        Optional<MenuItem> updated = menuItemRepository.findById(id);
-        assertTrue(updated.isEmpty());
+        var dto = TestData.updateMenuFullRequest();
+        assertThrows(JpaObjectRetrievalFailureException.class,
+                () -> menuItemRepository.updateMenu(1500L, dto));
     }
 
     @Test
