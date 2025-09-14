@@ -12,4 +12,6 @@ public interface CustomMenuItemRepository {
     int updateMenu(Long id, UpdateMenuRequest dto);
 
     List<MenuItem> getMenusFor(Category category, SortBy sortBy);
+
+    String getNameMenuByName(String name);
 }

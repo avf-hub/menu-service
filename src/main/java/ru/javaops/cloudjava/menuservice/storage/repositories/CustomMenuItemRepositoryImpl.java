@@ -50,4 +50,11 @@ public class CustomMenuItemRepositoryImpl implements CustomMenuItemRepository {
         TypedQuery<MenuItem> typedQuery = em.createQuery(select);
         return typedQuery.getResultList();
     }
+
+    @Override
+    public String getNameMenuByName(String name) {
+        return em.createQuery("select m.name from MenuItem m where m.name= ?1", String.class)
+                .setParameter(1, name)
+                .getSingleResult();
+    }
 }
