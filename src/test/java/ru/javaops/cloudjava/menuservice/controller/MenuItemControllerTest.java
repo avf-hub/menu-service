@@ -103,4 +103,55 @@ public class MenuItemControllerTest extends BaseTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void getMenu_returnsMenuItem() {
+        var id = getIdByName("Cappuccino");
+        webTestClient.get()
+                .uri(BASE_URL + "/" + id)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(MenuItemDto.class)
+                .value(response->{
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getName()).isEqualTo("Cappuccino");
+                });
+    }
+
+    @Test
+    void getMenu_returnsNotFound() {
+        var id = 100L;
+        webTestClient.get()
+                .uri(BASE_URL + "/" + id)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getMenus_returnsEmptyListMenusForCategory() {
+        webTestClient.get()
+                .uri(BASE_URL + "?category=lunch&sort=az")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(MenuItemDto.class)
+                .value(response -> {
+                    assertThat(response).isEmpty();
+                });
+    }
+
+    @Test
+    void getMenus_returnsSortingByAZListMenusForCategory() {
+        webTestClient.get()
+                .uri(BASE_URL + "?category=drinks&sort=az")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(MenuItemDto.class)
+                .value(items -> {
+                    assertThat(items).hasSize(3);
+                    assertThat(items.get(0).getName()).isEqualTo("Cappuccino");
+                    assertThat(items.get(1).getName()).isEqualTo("Tea");
+                    assertThat(items.get(2).getName()).isEqualTo("Wine");
+                });
+    }
 }
