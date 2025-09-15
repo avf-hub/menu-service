@@ -135,9 +135,7 @@ public class MenuItemControllerTest extends BaseTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(MenuItemDto.class)
-                .value(response -> {
-                    assertThat(response).isEmpty();
-                });
+                .value(response -> assertThat(response).isEmpty());
     }
 
     @Test
